@@ -5,7 +5,7 @@
 ![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![Playwright](https://img.shields.io/badge/Playwright-Automation-2EAD33?style=for-the-badge&logo=playwright&logoColor=white)
 ![Whisper](https://img.shields.io/badge/OpenAI-Whisper%20Local-412991?style=for-the-badge&logo=openai&logoColor=white)
-![Gemini](https://img.shields.io/badge/Google-Gemini%20Flash-4285F4?style=for-the-badge&logo=google&logoColor=white)
+![Ollama](https://img.shields.io/badge/Ollama-Local%20LLM-black?style=for-the-badge&logo=ollama&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/Platform-Ubuntu%20%7C%20Linux-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)
 
@@ -36,14 +36,15 @@ The entire pipeline runs on **free-tier APIs** and **locally-run open-source mod
 | Feature | Description |
 |---|---|
 | 🤖 **Direct Join** | Pass a Meet URL directly and the agent joins immediately |
-| 🎤 **Live Transcription** | Captures system audio and transcribes with local Whisper — no paid STT API needed |
-| 🙋 **Attendance Detection** | Detects your name or roll number in the transcript and responds "Present" in chat |
-| 🤔 **Question Answering** | Sends the transcript context to Gemini Flash and replies with a 1-sentence answer |
+| 🎤 **Live Transcription** | Captures system audio and transcribes with **Faster-Whisper** locally on CPU — no cloud STT, no API cost |
+| 🙋 **Smart Attendance Detection** | 4-layer keyword engine (exact → pattern list → fuzzy-spaced → Levenshtein) catches every Whisper mis-transcription of your name |
+| 🤔 **Question Answering** | Classifies audio and chat triggers as attendance or question, sends transcript context to local **Ollama** LLM, replies in 1 sentence |
+| 🪄 **Identity System Prompt** | Every Ollama call is pre-injected with a persona prompt so the bot always speaks as *you* in first person, never in third person |
 | 📸 **Slide OCR** | Screenshots the screen every 60 seconds and extracts text with Tesseract |
-| 📓 **Auto Notes** | Saves a structured `.txt` and `.pdf` file per class with timestamps, transcript, and slide text |
+| 📓 **AI-Generated Class Notes** | At end of session, Ollama reads the full session log and writes a structured Markdown study guide exported as `.txt` + `.pdf` |
 | 🔇 **Ghost Mode** | Joins with mic and camera off — completely silent to other participants |
-| 🦙 **Ollama Support** | Optional local LLM alternative to Gemini — no API key required at all |
-| ⚙️ **Configurable** | Single `config.py` file controls everything: name, model size, headless mode, and more |
+| 🛡️ **Hallucination Filtering** | Multi-layer output sanitizer strips prompt echoes, third-person self-references, and known Whisper garbage phrases before sending |
+| ⚙️ **Configurable** | Single `config.py` controls everything: your name, Whisper model size, Ollama model, headless mode, and more |
 
 ---
 
@@ -53,41 +54,87 @@ The diagram below shows the complete data flow from meeting URL input to notes g
 
 ```mermaid
 flowchart TD
-    A[🔗 Meet URL\npassed by user] -->|Direct launch| B[main.py\nEntry point]
-    B -->|Spawns browser| C[meeting_agent.py\nPlaywright Controller]
 
-    C -->|Joins Meet\nMutes mic & camera| D{Google Meet Session}
+    %% ── Entry ────────────────────────────────────────────────────────────
+    subgraph ENTRY ["🚀 Entry"]
+        A[main.py]
+        A --> REC{Recovery?}
+        REC -- Yes --> FIX[Fix logs\nRepair corrupted state]
+        REC -- No  --> SENSES
+    end
 
-    D -->|System audio stream| E[audio_handler.py\nPulseAudio Virtual Loopback]
-    D -->|Every 60s screenshot| F[meeting_agent.py\npage.screenshot]
+    %% ── Senses ───────────────────────────────────────────────────────────
+    subgraph SENSES ["🟡 Senses"]
+        direction LR
+        AUD[Audio\nMicrophone stream]
+        SCR[Screenshots\nVisual frame capture]
+        CHT[Chat\nMessage listener]
+    end
 
-    E -->|10-second WAV chunks| G[brain.py\nWhisper Local STT]
-    F -->|slides.png| H[brain.py\nTesseract OCR]
+    FIX     --> SENSES
+    ENTRY   --> AUD
+    ENTRY   --> SCR
+    ENTRY   --> CHT
 
-    G -->|Live transcript text| I{Keyword Detector\nname / roll no.}
-    I -->|Match found| J[brain.py\nGemini 1.5 Flash\nor Ollama]
-    I -->|No match| G
+    %% ── Brain ────────────────────────────────────────────────────────────
+    subgraph BRAIN ["🧠 Brain"]
+        direction TB
+        W[Whisper\nSpeech-to-text]
+        W --> CLS[Classifier\nIntent detection]
+        CLS -- Attendance --> FAST[Fast reply\nInstant response]
+        CLS -- Question   --> OLL[Ollama\nLLM reasoning]
+    end
 
-    J -->|Generated reply| K[meeting_agent.py\nPlaywright Chat Sender]
-    K -->|Types & sends message| D
+    AUD --> W
+    SCR -. side log .-> LOG
+    CHT -. side log .-> LOG
 
-    G -->|Transcript| L[notes/\nclass_notes_YYYY-MM-DD.txt\n+ .pdf]
-    H -->|Slide text| L
+    %% ── Output ───────────────────────────────────────────────────────────
+    subgraph OUTPUT ["💬 Output"]
+        direction TB
+        INJ[Injection\nReply into chat]
+        INJ --> END{Meet end?}
+        END -- No  --> INJ
+        END -- Yes --> PDF[PDF generator\nDetailed meeting report]
+    end
 
-    style A fill:#4285F4,color:#fff
-    style D fill:#34A853,color:#fff
-    style J fill:#EA4335,color:#fff
-    style L fill:#FBBC04,color:#000
+    FAST --> INJ
+    OLL  --> INJ
+
+    %% ── Log files ────────────────────────────────────────────────────────
+    LOG[Log files\nPersistent transcript]
+    W   -. side log .-> LOG
+    LOG --> PDF
+
+    %% ── Styles ───────────────────────────────────────────────────────────
+    style ENTRY   fill:#f0f0ff,stroke:#9999cc
+    style SENSES  fill:#e8f5e9,stroke:#81c784
+    style BRAIN   fill:#fff8e1,stroke:#ffb74d
+    style OUTPUT  fill:#e8f0fe,stroke:#7986cb
+    style FIX     fill:#ede7f6,stroke:#9575cd,color:#000
+    style PDF     fill:#c8e6c9,stroke:#66bb6a,color:#000
+    style LOG     fill:#bbdefb,stroke:#64b5f6,color:#000
+    style FAST    fill:#ffccbc,stroke:#ff7043,color:#000
+    style OLL     fill:#ffccbc,stroke:#ff7043,color:#000
+    style W       fill:#ffe0b2,stroke:#ffa726,color:#000
+    style CLS     fill:#ffe0b2,stroke:#ffa726,color:#000
 ```
+
+The diagram above also exists as a static image in the repo:
+
+![Architecture Diagram](docs/assets/architecture/architecture_diagram.png)
 
 **How the pipeline works, step by step:**
 
-1. **Entry** — You run `main.py` with a Meet URL (or `meeting_agent.py` directly). The orchestrator spawns a Playwright-controlled Chrome browser that joins the call with mic and camera disabled.
-2. **Audio Thread** — `audio_handler.py` creates a PulseAudio virtual loopback device so Python can "hear" the browser's audio output. It records in 10-second chunks and hands them to `brain.py`, which runs Whisper locally to produce a transcript.
-3. **Keyword Detection** — `brain.py` scans every transcript chunk for your name or roll number. When a match is found, it sends the last 30 seconds of transcript to Gemini Flash (or Ollama) to determine if it's an attendance call or a question, then generates the appropriate reply.
-4. **Chat Response** — `meeting_agent.py` uses Playwright to open the chat panel, type the generated response, and press Enter — all within a couple of seconds of detection.
-5. **OCR Thread** — In parallel, `meeting_agent.py` takes a full-page screenshot every 60 seconds. `brain.py` runs Tesseract OCR on the image to extract any slide or shared-screen text.
-6. **Notes** — Both the Whisper transcript and the OCR slide text are written (with timestamps) to `notes/class_notes_YYYY-MM-DD.txt`, which is also exported as a `.pdf` at the end of the session.
+1. **Entry (`main.py`)** — The orchestrator starts and immediately hits a **Recovery?** decision. If a previous session left corrupted logs or broken state, the agent repairs them first. Otherwise it launches all three sense threads simultaneously.
+2. **Senses — 3 parallel inputs** — Audio captures the microphone/system stream via PulseAudio loopback. Screenshots take a visual frame every 60 seconds. Chat listens to the Meet chat panel for incoming messages. All three write side-logs to the persistent transcript continuously.
+3. **Brain — Whisper STT** — Raw audio chunks are transcribed by Faster-Whisper locally on CPU (INT8, Urdu language hint). The transcript is deduplicated, garbage-filtered, and passed to the classifier.
+4. **Brain — Classifier / Intent Detection** — `classify_and_respond()` routes the transcript down one of two paths: **Attendance** (keywords like `present`, `haziri`, `roll call`) triggers the fast reply path; everything else goes to Ollama.
+5. **Fast Reply** — Attendance gets an instant static response (`"Present sir, mic kharab hai."`) with no LLM call — fastest possible path to the chat.
+6. **Ollama LLM Reasoning** — Questions are passed to the local Ollama model pre-injected with the identity system prompt. The raw output is sanitized to strip hallucinations before returning.
+7. **Output — Injection into Chat** — The reply is typed into the Meet chat by Playwright. The agent then loops on **Meet end?** — continuing to respond until the meeting ends.
+8. **Log Files / Persistent Transcript** — OCR slide text, audio transcripts, and chat messages are all side-logged to a persistent file throughout the session.
+9. **PDF Generator** — When the meeting ends, the full persistent transcript is fed to Ollama's dedicated note-taker prompt, producing a structured Markdown study guide exported as a detailed PDF meeting report.
 
 ---
 
@@ -97,9 +144,8 @@ flowchart TD
 |---|---|---|
 | **Browser Automation** | [Playwright](https://playwright.dev/) | Free / Open-source |
 | **Audio Capture** | [PulseAudio](https://www.freedesktop.org/wiki/Software/PulseAudio/) virtual loopback | Free (Linux system tool) |
-| **Speech-to-Text** | [OpenAI Whisper](https://github.com/openai/whisper) — runs locally | Free / No API calls |
-| **AI Brain** | [Gemini 1.5 Flash API](https://aistudio.google.com/) | Free tier: 15 RPM, 1M context |
-| **AI Brain (Alt)** | [Ollama](https://ollama.com/) — local LLM | Free / Fully offline |
+| **Speech-to-Text** | [Faster-Whisper](https://github.com/SYSTRAN/faster-whisper) — CPU · INT8 · local | Free / No API calls |
+| **AI Brain** | [Ollama](https://ollama.com/) — local LLM, fully offline | Free / No API key needed |
 | **OCR** | [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) | Free / Open-source |
 
 ---
@@ -112,7 +158,7 @@ Google-Meet-AI-Attendence-Agent/
 ├── main.py                  # 🎛️  Entry point and orchestrator
 ├── meeting_agent.py         # 🌐  Playwright browser control — joins Meet, sends chat, takes screenshots
 ├── audio_handler.py         # 🎤  PulseAudio virtual loopback — captures system audio in chunks
-├── brain.py                 # 🧠  Whisper STT, Tesseract OCR, and Gemini/Ollama API calls
+├── brain.py                 # 🧠  Faster-Whisper STT, Tesseract OCR, Ollama LLM, keyword detection, hallucination filtering
 ├── config.py                # ⚙️  All configuration — edit this file before running
 ├── download_model.py        # ⬇️  Pre-downloads the Whisper model (run once before first use)
 ├── ollama                   # 🦙  Ollama integration config / helper
@@ -190,17 +236,27 @@ cp ~/Downloads/token.json ~/Google-Meet-AI-Attendence-Agent/token.json
 
 ---
 
-### 3. Gemini API Key (Free)
+### 3. Ollama — Local LLM (Free, No API Key)
 
-Get a free key from [Google AI Studio](https://aistudio.google.com/):
+Ollama runs the AI brain entirely on your machine. Install it once and pull a model:
 
-1. Go to [aistudio.google.com](https://aistudio.google.com/) and sign in
-2. Click **Get API Key** → **Create API key in new project**
-3. Copy the key — you will paste it into `config.py` in Step 7
+```bash
+# Install Ollama
+curl -fsSL https://ollama.com/install.sh | sh
 
-The free tier gives you **15 requests per minute** and a **1 million token context window**, which is more than enough for a full class session.
+# Pull a model (pick one based on your RAM)
+ollama pull llama3.2        # Recommended — 2 GB, fast, good quality
+ollama pull gemma:2b        # Lighter — 1.5 GB, works on low-RAM machines
+ollama pull mistral         # Stronger reasoning — 4 GB RAM needed
+```
 
-> **Optional:** If you prefer a fully offline setup, use Ollama instead of Gemini — no API key needed at all. See the [Ollama section](#-using-ollama-instead-of-gemini) below.
+Then set your chosen model in `config.py`:
+
+```python
+OLLAMA_MODEL = "llama3.2"   # Must match the model name you pulled above
+```
+
+> Ollama runs as a local server on `localhost:11434`. Make sure it is running before starting the agent — see [Troubleshooting](#ollama-not-responding) if needed.
 
 ---
 
@@ -244,7 +300,7 @@ playwright install chromium
 playwright install-deps chromium
 ```
 
-### Step 6: Pre-Download the Whisper Model
+### Step 6: Pre-Download the Faster-Whisper Model
 
 This downloads the model weights into `whisper-model-turbo/` so there's no delay on the first real run:
 
@@ -252,37 +308,31 @@ This downloads the model weights into `whisper-model-turbo/` so there's no delay
 python3 download_model.py
 ```
 
-> The `turbo` model (~800 MB) gives the best speed/accuracy balance. If you're on a low-RAM machine, change `WHISPER_MODEL = "tiny"` in `config.py` before running this — the tiny model is only ~75 MB.
+> The `turbo` model (~800 MB) gives the best speed/accuracy balance. If you're on a low-RAM machine, change `FASTER_WHISPER_MODEL = "tiny"` in `config.py` before running this — the tiny model is only ~75 MB.
 
 ### Step 7: Configure `config.py`
 
 Open `config.py` and fill in your details. These are the critical fields:
 
 ```python
-# ── Your Identity ────────────────────────────────────────────────────────────
+# ── Your Identity ─────────────────────────────────────────────────────────────
 STUDENT_NAME    = "Idrees"       # Your name — the agent listens for this in the transcript
 ROLL_NUMBER     = "21-CS-42"     # Your roll number — also triggers the keyword detector
 
-# ── Gemini API ───────────────────────────────────────────────────────────────
-GEMINI_API_KEY  = "AIzaSy..."    # Paste your free key from aistudio.google.com
+# ── Ollama (Local LLM) ────────────────────────────────────────────────────────
+OLLAMA_MODEL    = "llama3.2"     # Must match the model you pulled with `ollama pull`
 
-# ── Whisper Model ─────────────────────────────────────────────────────────────
+# ── Faster-Whisper Model ──────────────────────────────────────────────────────
 # "tiny" = fastest ~75MB | "base" = ~150MB | "small" = ~480MB | "turbo" = best ~800MB
-WHISPER_MODEL   = "turbo"
+FASTER_WHISPER_MODEL = "turbo"
 
-# ── Browser ──────────────────────────────────────────────────────────────────
+# ── Browser ───────────────────────────────────────────────────────────────────
 HEADLESS_BROWSER = True          # Set to False for first login and debugging
 
-# ── Timing ───────────────────────────────────────────────────────────────────
-AUDIO_CHUNK_SECONDS   = 10       # How often Whisper processes audio
-SCREENSHOT_INTERVAL_S = 60       # How often slides are captured
-ATTENDANCE_CONTEXT_S  = 30       # Seconds of transcript sent to Gemini when name detected
-```
-
-Alternatively, export the key as an environment variable instead of hardcoding it:
-
-```bash
-export GEMINI_API_KEY="AIzaSy..."
+# ── Timing ────────────────────────────────────────────────────────────────────
+AUDIO_CHUNK_SECONDS   = 10       # How often Faster-Whisper processes audio
+SCREENSHOT_INTERVAL_S = 60       # How often slides are captured (seconds)
+ATTENDANCE_CONTEXT_S  = 30       # Seconds of rolling transcript sent to Ollama on name match
 ```
 
 ### Step 8: First-Time Google Login
@@ -306,23 +356,60 @@ From this point on, the agent will reuse the saved session silently on every run
 
 ---
 
-## 🦙 Using Ollama Instead of Gemini
+## 🧠 How `brain.py` Works
 
-For a fully offline, API-key-free setup:
+`brain.py` is the core intelligence of the agent. Here is exactly what happens inside it during a live session.
 
-```bash
-# 1. Install Ollama
-curl -fsSL https://ollama.com/install.sh | sh
+### Faster-Whisper Transcription
 
-# 2. Pull a lightweight model
-ollama pull gemma:2b
+Every 10-second audio chunk goes through a two-stage filter before Whisper even sees it. First, an RMS energy check discards silent chunks (threshold: RMS < 50 on a 16-bit PCM scale). Then Faster-Whisper runs with `beam_size=8`, `language="ur"` (Urdu hint for mixed Urdu/English lectures), `vad_filter=True` to strip silence mid-chunk, and this initial prompt to dramatically reduce hallucinations:
 
-# 3. In config.py, switch the brain:
-USE_OLLAMA   = True
-OLLAMA_MODEL = "gemma:2b"
+```
+"Yeh ek university lecture hai. Teacher Urdu aur English mix mein baat karte hain.
+Student ka naam Idrees hai. Topics: AI agents, environment types, software engineering..."
 ```
 
-The `ollama` file in the project root contains the helper configuration for this integration.
+After transcription, two more filters run: a sentence deduplicator (catches Whisper's repetition loops), and a garbage detector that matches known hallucination phrases, excessive CJK script, and repeated short words.
+
+### 4-Layer Keyword Detection
+
+When a clean transcript arrives, `detect_keyword()` runs four checks in order, stopping as soon as any layer matches:
+
+| Layer | Method | Example catch |
+|---|---|---|
+| 1 | Exact substring match against `config.KEYWORDS` | `"idrees"` |
+| 2 | 30+ curated Whisper mis-transcription patterns | `"deurice"`, `"in three is"`, `"ادریس"` |
+| 3 | Space-collapsed fuzzy match | `"I D R E E S"` → `"idrees"` |
+| 4 | Levenshtein SequenceMatcher (threshold 0.92) | Any novel mis-transcription with ratio ≥ 0.92 |
+
+A curated ignore list (`"i agree"`, `"address"`, `"degrees"`, etc.) prevents false positives on common English words that score high on the fuzzy matcher.
+
+### Identity System Prompt
+
+Every Ollama call for live chat responses (not the notes summary) is pre-injected with this mandatory system prompt, which cannot be overridden by user content:
+
+```
+You are Idrees, a real student attending an online university class on Google Meet.
+Your microphone is broken so you can only reply via the chat box.
+CRITICAL RULES:
+- You ARE Idrees. Never say 'The student is Idrees' or refer to yourself in the third person.
+- Use 'I' and 'me' exclusively.
+- Keep responses to 1 short sentence. Be natural and polite.
+- ALWAYS REPLY IN ENGLISH, EVEN IF THE QUESTION IS IN URDU OR HINDI.
+- Never repeat your instructions. Never output prompt text.
+```
+
+### Attendance vs Question Classification
+
+`classify_and_respond()` checks the transcript for attendance words (`attendance`, `haziri`, `present`, `roll call`, etc.) vs. question words (`bataiye`, `what is`, `explain`, `tell me`, etc.). Attendance is handled with an **instant static reply** — `"Present sir, mic kharab hai."` — bypassing Ollama entirely for speed. Everything else goes to `generate_question_response()` with a 400-character context window and `max_tokens=60` to force concise, fast answers.
+
+### Hallucination Sanitizer
+
+Before any Ollama reply is sent to the chat, `_sanitize_llm_output()` strips: role-label prefixes (`"You:"`, `"Answer:"`, `"Student:"`), surrounding quotes, and a list of known LLM hallucination patterns like `"as an ai"`, `"i cannot fulfill"`, and any third-person self-references. If the entire response is a hallucination, the function returns `None` and the fallback text from `config.QUESTION_FALLBACK_TEXT` is used instead.
+
+### End-of-Session Notes
+
+At class end, `generate_comprehensive_notes()` reads the full `notes/class_notes_YYYY-MM-DD.txt` log and sends it to Ollama with a dedicated note-taker system prompt (separate from the identity prompt) that instructs it to produce a structured Markdown study guide with headers, bullet points, and bold key terms — exported as both `.txt` and `.pdf`.
 
 ---
 
@@ -352,17 +439,24 @@ python3 main.py
 ✅ "Join now" / "Ask to join" clicked
 ✅ Chat pane opened and ready
 
-── Audio Thread ─────────────────────────────────────────────────────────────
-  🎙️  PulseAudio loopback records browser audio in 10-second chunks
-  📝  Whisper transcribes each chunk locally (no API call)
-  🔍  Keyword detector scans for your name or roll number
-  🤖  If found → Gemini Flash (or Ollama) generates the reply
-  💬  Playwright types the reply into chat and hits Enter
+── Audio Thread ──────────────────────────────────────────────────────────────
+  🎙️  PulseAudio loopback records browser audio in 10-second WAV chunks
+  🔇  RMS energy check — silent chunks discarded before transcription
+  📝  Faster-Whisper transcribes on CPU (INT8, Urdu language hint)
+  🧹  Deduplication + garbage filter cleans the transcript
+  🔍  4-layer keyword detector scans for your name / roll number
+  🤖  On match → classify_and_respond() → Ollama local LLM (or instant static reply for attendance)
+  🛡️  Hallucination sanitizer strips prompt echoes from LLM output
+  💬  Playwright types the clean reply into chat and hits Enter
 
-── Visual Thread ────────────────────────────────────────────────────────────
+── Visual Thread ─────────────────────────────────────────────────────────────
   📸  Screenshot taken every 60 seconds
-  🔤  Tesseract extracts text from the slide / shared screen
-  📓  Text appended to notes/class_notes_YYYY-MM-DD.txt with PDF export
+  🔤  Tesseract extracts text from slides / shared screen
+  📓  Text appended with timestamp to notes/class_notes_YYYY-MM-DD.txt
+
+── End of Session ────────────────────────────────────────────────────────────
+  🦙  Ollama reads full session log → generates structured Markdown study guide
+  📄  Exported as .txt and .pdf in notes/
 ```
 
 ---
@@ -387,7 +481,7 @@ When the teacher calls the student's name during roll call, the agent detects th
 
 ### ❓ Question Detected and Answered
 
-When the agent detects a question directed at the student, it sends the transcript to Gemini Flash and posts the AI-generated 1-sentence answer in the Meet chat.
+When the agent detects a question directed at the student, it sends the transcript to the local **Ollama** LLM and posts the AI-generated 1-sentence answer in the Meet chat.
 
 ![Question Answer](docs/assets/testing/Question_Answer_in_chat.jpeg)
 
@@ -445,38 +539,31 @@ python3 meeting_agent.py "https://meet.google.com/your-link"
 Switch to a lighter model in `config.py`:
 
 ```python
-WHISPER_MODEL = "tiny"    # 75 MB  — works on any machine
-WHISPER_MODEL = "base"    # 150 MB — good balance
-WHISPER_MODEL = "small"   # 480 MB — better accuracy
-WHISPER_MODEL = "turbo"   # 800 MB — best (needs 4 GB+ RAM)
+FASTER_WHISPER_MODEL = "tiny"    # 75 MB  — works on any machine
+FASTER_WHISPER_MODEL = "base"    # 150 MB — good balance
+FASTER_WHISPER_MODEL = "small"   # 480 MB — better accuracy
+FASTER_WHISPER_MODEL = "turbo"   # 800 MB — best (needs 4 GB+ RAM)
 ```
 
 ---
 
-### Audio Not Being Captured
+### Ollama Not Responding / Slow Replies
 
 ```bash
-# Check PulseAudio is running
-pactl info
+# Check Ollama server is running
+curl http://localhost:11434
 
-# If you see "Connection refused", start it:
-pulseaudio --start
+# If not, start it manually
+ollama serve
 
-# List audio sources — look for the browser monitor or loopback device
-pactl list sources short
+# Verify your model is pulled
+ollama list
+
+# Pull it again if missing
+ollama pull llama3.2
 ```
 
----
-
-### Gemini API Rate Limit Errors
-
-The free tier caps at 15 requests per minute. Reduce frequency in `config.py`:
-
-```python
-AUDIO_CHUNK_SECONDS = 20      # Process audio every 20s instead of 10s
-```
-
-Or switch to Ollama for unlimited, fully offline inference.
+Make sure `OLLAMA_MODEL` in `config.py` exactly matches the name shown by `ollama list`. For faster replies on low-RAM machines, switch to a lighter model like `gemma:2b`.
 
 ---
 
@@ -501,9 +588,9 @@ python3 download_model.py
 Suggested versioning:
 
 ```
-v1.0.0  — Initial release: Whisper turbo + Gemini Flash + OCR notes
-v1.1.0  — Ollama offline LLM support added
-v1.2.0  — PDF notes export
+v1.0.0  — Initial release: Faster-Whisper turbo + Ollama + Tesseract OCR notes
+v1.1.0  — 4-layer fuzzy keyword detection + hallucination sanitizer
+v1.2.0  — AI-generated end-of-session PDF study guide
 v2.0.0  — Future: Docker support / cross-platform
 ```
 
@@ -523,11 +610,10 @@ MIT License — see [LICENSE](LICENSE) for details.
 
 ## 🙏 Acknowledgements
 
-- [OpenAI Whisper](https://github.com/openai/whisper) — free, accurate, local speech recognition
-- [Google Gemini Flash](https://aistudio.google.com/) — generous free-tier AI API
+- [Faster-Whisper](https://github.com/SYSTRAN/faster-whisper) — CPU-efficient local speech recognition with INT8 quantization
+- [Ollama](https://ollama.com/) — run LLMs fully offline with zero API cost
 - [Microsoft Playwright](https://playwright.dev/) — reliable cross-browser automation
-- [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) — open-source text extraction
-- [Ollama](https://ollama.com/) — run LLMs locally with zero API cost
+- [Tesseract OCR](https://github.com/tesseract-ocr/tesseract) — open-source text extraction from slides
 
 ---
 
