@@ -1,0 +1,59 @@
+# ============================================================
+#  Google Meet AI Agent — .gitignore
+# ============================================================
+
+# --- SENSITIVE CREDENTIALS (NEVER commit these) ---
+credentials.json
+token.json
+
+# --- PLAYWRIGHT BROWSER PROFILE (contains session cookies) ---
+playwright_profile/
+
+# --- PYTHON ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+dist/
+build/
+eggs/
+sdist/
+wheels/
+*.spec
+pip-log.txt
+pip-delete-this-directory.txt
+.Python
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# --- PYTEST ---
+.pytest_cache/
+.cache/
+nosetests.xml
+coverage.xml
+*.cover
+htmlcov/
+.tox/
+.hypothesis/
+
+# --- IDEs & EDITORS ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-project
+*.sublime-workspace
+*~
+
+# --- OS ---
+.DS_Store
+Thumbs.db
+desktop.ini
