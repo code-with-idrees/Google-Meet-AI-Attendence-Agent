@@ -57,3 +57,22 @@ htmlcov/
 .DS_Store
 Thumbs.db
 desktop.ini
+credentials.json
+token.json
+playwright_profile/
+__pycache__/
+.env
+# --- MODELS & LARGE ASSETS ---
+# whisper-model-turbo/
+# ollama
+
+# --- NOTES ---
+# notes/
+
+# --- MISC ---
+h origin main --force
+whisper-model-turbo/
+ollama
+.cache/
+whisper-model-turbo/
+ollama

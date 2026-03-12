@@ -1,6 +1,23 @@
+# Google Meet AI Agent — Dependencies
+# Install with: pip install -r requirements.txt
+
+# --- Core: Browser Automation & Scheduling ---
+playwright==1.41.2
+schedule==1.2.1
+
+# --- Gmail API ---
 google-api-python-client==2.118.0
 google-auth-httplib2==0.2.0
 google-auth-oauthlib==1.2.0
-playwright==1.41.2
-python-dateutil==2.8.2
-schedule==1.2.1
+
+# --- NEW: AI Brain ---
+openai-whisper           # Local speech-to-text (runs on CPU)
+google-generativeai      # Gemini 1.5 Flash API (free tier)
+
+# --- NEW: OCR & Audio ---
+pytesseract              # Python wrapper for Tesseract OCR
+SoundFile                # Audio file I/O
+Pillow                   # Image processing for OCR
+
+# NOTE: System packages also required (one-time):
+#   sudo apt install -y tesseract-ocr portaudio19-dev

@@ -1,0 +1,378 @@
+
+============================================================
+Timestamp: 2026-03-13 00:05:07
+============================================================
+
+--- SLIDE (OCR) ---
+i Muhammad Idrees (Presenting, annotating)
+Muhammad Idrees Idrees
+SMe oes eed @x ae ae — + a fa x
+a (e} BMI olge Rolfe al fe (ne Aso eel CO Rv Pei)
+Last Updated : 5 Aug, 2024 “OP:
+An environment in artificial intelligence is the surrounding of the agent. The
+agent takes input from the environment through sensors and delivers the
+output to the environment through actuators. There are several types of
+environments:
+FullysObservable vs Partially Observable
+Deterministic vs Stochastic
+Competitive vs Collaborative
+Single-agent vs Multi-agent
+Static vs Dynamic
+Discrete vs Continuous
+Episodic vs Sequential
+; Ape 12:05 AM
+P® Type here to search =% i c Re Ke nC 3/13/2026 LG
+12:04 AM | zcm-ddyn-wov en) ee i
+OR enw
+f=) Continuous chat is OFF
+Messages will not be saved for meeting participants
+when the call ends. You can pin a message to make it
+visible for people who join later.
+Send a message
+
+
+============================================================
+Timestamp: 2026-03-13 00:06:00
+============================================================
+
+--- TEACHER (Audio Transcript) ---
+I hope that you guys are doing well, okay. Today we have a topic. Agent input देता है from the environment ठीक है फिर उसके बाद यह होता है कि environment हमारा create होता है मतलब कि जो हमारे sensors होते हैं उससे वो environment लेता है sorry उस sensor से वो environment को.
+
+--- SLIDE (OCR) ---
+& Muhammad Idrees (Presenting, annotating)
+Muhammad Idrees Idrees
+Sm eee ee and @x
+Types of Environments in Al-C X +
+€ CMR ie ele eer ei ele As] ee ee
+P® Type here to search
+12:05 AM | zcm-ddyn-wov
+Fully Observable vs Partially Observable
+Deterministic vs Stochastic
+Competitive vs Collaborative
+Single-agent vs Multi-agent
+Static vs Dynamic
+Discrete vs Continuous
+Episodic vs Sequential
+Known vs Unknown
+Are you talking? Your mic is
+off. Click the mic to turn it on.
+@& 17°C Mostly cloudy
+= fa x
+CO ee ae
+oe eee
+ca)
+Coe |
+3/13/2026 4
+i ; ®
+|) Continuous chat is OFF
+Messages will not be saved for meeting participants
+when the call ends. You can pin a message to make it
+visible for people who join later.
+Send a message
+
+
+============================================================
+Timestamp: 2026-03-13 00:07:07
+============================================================
+
+--- TEACHER (Audio Transcript) ---
+Observable or partially observable environment ہے. ہمارے پاس ٹھیک ہے. اس کے بعد ہمارے پاس ٹھیک ہے. اس کے بعد ہمارے پاس کون سی fire ہے. ہمارے پاس اس کے بعد.
+
+--- SLIDE (OCR) ---
+m 3
+"7 Muhammad Idrees (Presenting, annotating) By Qa
+f=) Continuous chat is OFF
+Muhammad Idrees Idrees Messages will not be saved for meeting participants
+when the call ends. You can pin a message to make it
+visible for people who join later.
+SMe oes eto @x ae ae — + a fa x
+a (e} Bo olge Rolfe Lathe fe (ne s/o le Ce Rv Peer)
+environment else it is partially observable.
+e Maintaining a fully observable environment is easy as there is no need to
+keep track of the history of the surrounding.
+e An environment is called unobservable when the agent has no sensors in
+all environments.
+e Examples:
+© Chess - the board is fully observable, and so are the opponent's
+moves.
+° Driving - the environment is partially observable because what's
+around the corner is not known.
+2. Deterministic vs Stochastic Send a message
+Peal
+®@ .-, = one
+BE 17°C Mostlycouly Am BSH E Preis
+12:06 AM | zcm-ddyn-wov en) ee i
+On = en 6 Ont
+
+
+============================================================
+Timestamp: 2026-03-13 00:08:09
+============================================================
+
+--- TEACHER (Audio Transcript) ---
+اس کے بعد لیکن جو partially observable ہوتا ہے وہ ہمارے پاس اس میں یہ ہوتا ہے کہ ہمارے اب جو maximum environment ہوتا ہے وہ known نہیں ہوتا مطلب کہ ہمارے پاس اس میں جو مطلب کہ the environment is unobservable when the agent has no sensors in the environment.
+
+--- SLIDE (OCR) ---
+m 3
+"7 Muhammad Idrees (Presenting, annotating) By er
+f=) Continuous chat is OFF
+Muhammad Idrees Idrees Messages will not be saved for meeting participants
+when the call ends. You can pin a message to make it
+visible for people who join later.
+SMe oes eto @x aaa +a a fa x
+a (e} BM olge Rolfe) Ua tlie al fe (ne Aso ele CO Rv Peer)
+2. Deterministic vs Stochastic
+e When a uniqueness in the agent's current state completely determines
+the next state of the agent, the environment is said to be deterministic.
+e The stochastic environment is random in nature which is not unique and
+cannot be completely determined by the agent.
+¢ Examples:
+© Chess - there would be only a few possible moves for a chess
+piece at the current state and these moves can be determined.
+° Self-Driving Cars- the actions of a self-driving car are not
+unique, it varies time to time.
+3. Competitive vs Collaborative Send a message
+Cor
+3/13/2026 1
+BB zc Mostly clouly Am eae
+12:08 AM | zcm-ddyn-wov en) ee i
+On = en 6 Ont
+
+
+============================================================
+Timestamp: 2026-03-13 00:09:09
+============================================================
+
+--- TEACHER (Audio Transcript) ---
+Get a move, karte hain. There are a particular THIS. All right, then we'll move on to six different sites. Then there is a common area in each other. Only 2 funds on pondrakeh kemoov, karteh kaar.
+
+--- SLIDE (OCR) ---
+i Muhammad Idrees (Presenting, annotating)
+Muhammad Idrees Idrees
+SMe oes eto @x aaa +a
+€ 23 geeksforgeeks.org/artificial-intelligence/types-of-environments-in-ai/
+¢e CO ee ee
+with each other to avoid collisions and reach their destination which is the
+output desired.
+4. Single-agent vs Multi-agent
+e An environment consisting of only one agent is said to be a single-agent
+environment.
+¢ A person LEft alone in a maze is an example of the single-agent system.
+e An environment involving more than one agent is a multi-agent
+environment.
+e The game of football is multi-agent as it involves 11 players in each team.
+5. Dynamic vs Static
+e An environment that keeps constantly changing itself when the agent is
+Cor
+EYE
+BE 17°C Mostly couly Am BSH E
+12:09 AM | zcm-ddyn-wov
+ca)
+f=) Continuous chat is OFF
+Messages will not be saved for meeting participants
+when the call ends. You can pin a message to make it
+visible for people who join later.
+Send a message
+
+
+============================================================
+Timestamp: 2026-03-13 00:10:09
+============================================================
+
+--- TEACHER (Audio Transcript) ---
+मैं आप किसी से question पूछ लेता हूँ. ठीक है? तो कौन मुझे answer करेगा? अच्छा तो इसमें मुझे अधरीस मुझे आप answer करें कि single agent में और multi agent के अंदर हमारे पास क्या फरक होता है? single agent के अंदर Idrees, मुझे आपको मेरी आवाज आ रही है. Single agent environment और multi-agent environment.
+
+--- SLIDE (OCR) ---
+i Muhammad Idrees (Presenting, annotating)
+ony ay
+as Ww
+Muhammad Idrees Idrees
+SMe oes eto @x aaa +a a fa
+a (e} BM (oc olgelKel folate al fe (ne sole Ce Rv Peer)
+with each other to avoid collisions and reach their destination which is the
+output desired.
+4. Single-agent vs Multi-agent
+e An environment consisting of only one agent is said to be a single-agent
+environment.
+¢ A person LEft alone in a maze is an example of the single-agent system.
+e An environment involving more than one agent is a multi-agent
+environment.
+e The game of football is multi-agent as it involves 11 players in each team.
+5. Dynamic vs Static
+e An environment that keeps constantly changing itself when the agent is
+Core
+EYE
+BE 17°C Mostly couly Am BSH E
+12:10 AM | zcm-ddyn-wov
+ca)
+f=) Continuous chat is OFF
+Messages will not be saved for meeting participants
+when the call ends. You can pin a message to make it
+visible for people who join later.
+Send a message
+
+
+============================================================
+Timestamp: 2026-03-13 00:11:08
+============================================================
+
+--- SLIDE (OCR) ---
+i Muhammad Idrees (Presenting, annotating)
+“aah my
+a Ww
+Muhammad Idrees Idrees
+SMe oes eto @x een +a a fa x
+a RN ee ele eter eel eA] eee W ye FB Incognito
+e The game of football is multi-agent as it involves 11 players in each team.
+5. Dynamic vs Static
+e An environment that keeps constantly changing itself when the agent is
+up with some action is said to be dynamic.
+¢ Aroller coaster ride is dynamic as it is set in motion and the environment
+keeps changing every instant.
+e An idle environment with no change in its state is called a static
+environment.
+e An empty house is static as there's no change in the surroundings when
+an agent enters.
+6. Discrete JOU
+3 j , ae Por
+P& Type here to search 2: Fi 7 BB 17°C Mostlyclouly Am ES SHE pee
+OR enw
+12:11 AM | zcm-ddyn-wov en) ~
+f=) Continuous chat is OFF
+Messages will not be saved for meeting participants
+when the call ends. You can pin a message to make it
+visible for people who join later.
+12:10AM
+In a single agent environment, the
+agent makes decisions based on
+its own preferences and goals,
+whereas in a multi-agent
+environment, agents interact and
+cooperate with each other to
+achieve common objectives.
+nome Mant t-(e [Men ania!
+Send a message
+
+
+============================================================
+Timestamp: 2026-03-13 00:12:11
+============================================================
+
+--- TEACHER (Audio Transcript) ---
+ڈیوارمنٹ یا کوئی ایک چیز اگر ہمارے پاس static میں ہو جائے تو وہ ہمارے پاس یا ڈل میں ہو جائے تو وہ ہمارے پاس کیا ہوتی ہے وہ ہمارے پاس static environment میں آ جاتا ہے ٹھیک ہے؟ اچھا تو اچھا ابھی میں آپ سے یہاں سے کوشن.
+
+--- SLIDE (OCR) ---
+i Muhammad Idrees (Presenting, annotating)
+Muhammad Idrees
+SS Yee oud © X = 2 Typesof Environments inAl-G X | + = a a
+€ > SG @ meet google.com/zcm-ddyn-wov?pli=1 a
+[See Ce cuca re a)) ( stoppresenting Pair)
+121AM
+You are presenting
+To avoid an infinity mirror, don't share your entire screen or browser window.
+Ty en Ree Rea ais ao .
+Lf Pa
+oy Rt ee a
+Seen aeecatct aE caos
+Cet unc ay
+Sea ee
+en ar)
+Conran
+apa es as
+iti celta A dein
+AN i ie
+Rona ma
+~+ B@ecze oo Om# 6
+ara)
+(7) en i en) <3 Pee nh eo eS i |
+0 0 eS = rT)
+12:12 AM | zcm-ddyn-wov en) ~ Ok
+12:12 AM | zcm-ddyn-wov
+Muhammad Idrees 12:11AM
+i iid what is the difference between the
+episodic and sequential
+environment idrees
+12:12AM
+Send a message >
+
+
+============================================================
+Timestamp: 2026-03-13 00:13:13
+============================================================
+
+--- TEACHER (Audio Transcript) ---
+चले, ठीक है, सही है, सही है, बहुत अच्छा होगा, ठीक है? तो बहुत बहुत बेतरी, thank you. ठीक है, ठीक है.
+
+--- SLIDE (OCR) ---
+Muhammad Idrees
+Se coe oun a @x
+Muhammad Idrees (Presenting, annotating)
+nut, ee a
+€ > SG @ meet google.com/zcm-ddyn-wov?pli=1
+(2) Muhammad Idrees (You, presenting, annotating)
+You are presenting
+Brel UNIS Aun Une Re ult eet Rem cei mn Tie la
+Sse Ree Rela
+a ey
+ecb y
+12:13 AM | zcm-ddyn-wov
+12:13 AM | zcm-ddyn-wov
+-+ 8@@ecc«e
+ere: ee Dl
+ol a Pa
+Fx & incognito Muhammad Idrees 12:11AM
+( stoppresenting i a i Fi Mina eM aXe iti UreN 1a Canal)
+episodic and sequential
+12:11AM
+(eComraraA
+TR Telefe ol ena lee
+Sea ee
+en ar)
+Conran
+Deer
+eo .
+ne ee Dey
+Oo =
+B 17°C Mostly cloudy
+Cen)
+Seen aeecatct aE caos
+Cet unc ay
+12:12AM
+Send a message
+SPaEvAW
+3/13/2026 ba) |
+
+
+============================================================
+Timestamp: 2026-03-13 00:14:25
+============================================================
+
+--- TEACHER (Audio Transcript) ---
+23I05A2 Idrees are present hai.
+
+--- SLIDE (OCR) ---
+i Muhammad Idrees (Presenting, annotating) S|
+Muhammad Idrees 12:11AM
+Muhammad Idrees
+lat , ,
+if what is the difference between the
+a ee ne ONE eo a nes episodic and sequential
+€ > GS @ meet google.com/zcm-ddyn-wov?pli=1 Se Sea a et
+Ce a C scorers
+cS} Ea irees (You, presenting, al ing) Hoe 12:12AM
+(ema
+You are presenting ca ncaa beers
+Beers Aue eR ea eet uke cee ae iS ee Ete
+Sse Ree Pel aero Ge Re re eR
+Ree tear area eul
+nn a een LE
+asta ache ha A ar een
+a aa Ws arr 12:13AM
+[Cra
+a aa Gee
+oe &
+PPC otto Cl en a | ca | © =) PU) = oo © M@ & Send a message >
+= 1 ®o@C@nrpEaesd P ea ec
+i i
+12:14 AM | zcm-ddyn-wov en) ~ (@) ea) wy H ©
+

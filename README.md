@@ -1,202 +1,153 @@
-<h1 align="center">🤖 Google Meet AI Attendance Agent</h1>
+# Google Meet AI Agent — Full Classroom Proxy 🤖🎓
 
-<p align="center">
-  <img src="https://img.shields.io/badge/Python-3.9%2B-blue?style=for-the-badge&logo=python&logoColor=white" />
-  <img src="https://img.shields.io/badge/Playwright-Automation-green?style=for-the-badge&logo=playwright&logoColor=white" />
-  <img src="https://img.shields.io/badge/Gmail-API-red?style=for-the-badge&logo=gmail&logoColor=white" />
-  <img src="https://img.shields.io/badge/Google%20Cloud-Platform-orange?style=for-the-badge&logo=googlecloud&logoColor=white" />
-  <img src="https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge" />
-</p>
-
-<p align="center">
-  An autonomous AI agent that monitors your Gmail inbox for Google Meet invitations from a specific sender, joins the meeting automatically at the correct time, and responds in the meeting chat when a configured trigger word is detected.
-</p>
+Building a "Full Classroom Proxy" for free using a clever mix of open-source tools and **Free Tier** APIs. It can **hear**, **see**, and **speak** (via chat) using the "Free-Forever" approach.
 
 ---
 
-## ✨ Features
+## 🛠️ The "Free" Tech Stack
 
-- 📧 **Smart Email Monitoring** — Polls Gmail via the official Gmail API for unread Meet invitations from a specified sender
-- 🔗 **Automatic Meet Link Extraction** — Parses the email body to extract Google Meet URLs using robust regex patterns
-- ⏰ **Intelligent Scheduling** — Schedules the bot to join the meeting at the right time rather than immediately
-- 🤖 **Bot Detection Bypass** — Uses Playwright stealth args, custom user-agents, and persistent profiles to avoid detection
-- 💬 **Chat Monitor & Auto-Reply** — Continuously monitors the in-meeting chat and sends a configured reply when a trigger word appears
-- 🔒 **OAuth 2.0 Secure Authentication** — Uses Google's official OAuth flow — no passwords stored
+| Feature | Tool | Why? |
+| --- | --- | --- |
+| **Browser Control** | **Playwright** | Free; automates Chrome to join and interact with Google Meet. |
+| **Audio Capture** | **PulseAudio (Linux)** | Free system-level audio routing via virtual loopback. |
+| **Speech-to-Text** | **OpenAI Whisper (Local)** | Completely free; runs on your CPU/GPU. |
+| **Brain (Notes/Chat)** | **Gemini 1.5 Flash API** | Massive free tier (15 RPM) and 1M context window. |
+| **OCR (Slides)** | **Tesseract OCR** | Open-source; converts slide images to text for free. |
 
 ---
 
-## 🏗️ Architecture
+## 📋 How It Works (The Procedure)
 
+### 1. Route the "Teacher's Voice" to Python
+Normally, your code can't "hear" what's coming out of the speakers. The agent creates a **Virtual Loopback** using `pactl` to create a virtual source. This allows Python to record the browser audio as if it were a microphone. Audio is recorded in **10-second chunks** continuously using `SoundFile` + `parec`.
+
+### 2. Transcribe Audio for Free (Whisper)
+Instead of paying for Google/AWS Speech-to-Text, we run **Whisper** locally.
+- The script sends each 10-second audio chunk to Whisper.
+- **Result:** You get a live text transcript of everything the teacher says.
+
+### 3. The "Keyword Trigger" (Attendance & Questions)
+The script scans the transcript for **"Idrees"** or your **Roll Number**.
+- **If detected:** Immediately sends the last 30 seconds of transcript to the **Gemini API**.
+- **Prompt:** *"The teacher just called my name. Here is the transcript: [Transcript]. If it's attendance, tell me to say 'Present, mic kharab hai'. If it's a question, give me a 1-sentence answer."*
+
+### 4. Automated Chat Response
+Once Gemini gives the answer:
+- Uses Playwright to click the "Chat" icon.
+- Types the response: `"Present, sir. Mic kharab hai isliye chat me reply kar raha hu."`
+- Presses Enter to send.
+
+### 5. Screen Notes (OCR)
+To capture slides:
+- Every 60 seconds, Playwright takes a screenshot: `page.screenshot(path="slides.png")`.
+- Uses `pytesseract` to extract text from the slide.
+- Saves this text into a daily `notes/` file along with the timestamp and the Whisper transcript.
+
+---
+
+## 📂 Project Structure
+
+```text
+.
+├── main.py             # Orchestrator — Gmail polling & scheduling
+├── meeting_agent.py    # The Bot — Playwright browser control & UI loop
+├── audio_handler.py    # Captures system audio via PulseAudio loopback
+├── brain.py            # Gemini API calls & Whisper transcription logic
+├── config.py           # All configuration & feature toggles
+├── email_watcher.py    # Gmail API — fetches meeting invitations
+├── notes/              # Folder for daily class notes (auto-created)
+├── requirements.txt    # Python dependencies
+└── playwright_profile/ # Persistent browser profile (saves login)
 ```
-┌───────────────────────────────────────────────────────────────────┐
-│                         main.py (Orchestrator)                    │
-│                                                                   │
-│   ┌─────────────────────────┐   ┌───────────────────────────┐    │
-│   │     email_watcher.py    │   │      meeting_agent.py     │    │
-│   │                         │   │                           │    │
-│   │  Gmail API  ──► Poll    │   │  Playwright  ──► Join     │    │
-│   │  Inbox every N seconds  │──►│  Browser     ──► Monitor  │    │
-│   │  Extract Meet URL       │   │  Chat DOM    ──► Reply    │    │
-│   └─────────────────────────┘   └───────────────────────────┘    │
-│                    ▲                           ▲                   │
-│                    └───────── config.py ───────┘                  │
-└───────────────────────────────────────────────────────────────────┘
-```
-
-### Component Overview
-
-| File | Responsibility |
-|---|---|
-| `main.py` | Orchestrator — runs the scheduling loop and coordinates all components |
-| `email_watcher.py` | Authenticates with Gmail API and polls inbox for Meet invitations |
-| `meeting_agent.py` | Browser automation — joins meeting, monitors chat, sends replies |
-| `config.py` | Single source of truth for all settings (sender email, trigger word, etc.) |
 
 ---
 
-## 🚀 Getting Started
+## 🚀 Setup & Installation
 
-### Prerequisites
-
-- Python **3.9** or higher
-- A **Google Cloud Platform** account (free tier is fine)
-- A Google account whose inbox will be monitored
-
----
-
-### Step 1 — Clone the Repository
-
+### Step 1: Install System Dependencies (One-Time)
 ```bash
-git clone https://github.com/YOUR_USERNAME/google-meet-ai-agent.git
-cd google-meet-ai-agent
+sudo apt update && sudo apt install -y tesseract-ocr portaudio19-dev
 ```
 
----
-
-### Step 2 — Google Cloud Setup (Gmail API)
-
-> **This is a one-time setup.**
-
-1. Go to [Google Cloud Console](https://console.cloud.google.com/) and create a new project (e.g., `MeetAgent`).
-2. Navigate to **APIs & Services → Library**, search for **Gmail API**, and click **Enable**.
-3. Navigate to **APIs & Services → OAuth consent screen**:
-   - Choose **External** as User Type.
-   - Fill in an App Name (e.g., `MeetAgent`) and your email as the support email.
-   - Under **Audience → Test users**, click **+ ADD USERS** and add your Gmail address.
-4. Navigate to **APIs & Services → Clients**:
-   - Click **Create OAuth client**.
-   - Application type: **Desktop app**.
-   - Click **Create**, then click the **Download JSON** icon next to the new client.
-5. Rename the downloaded file to **`credentials.json`** and place it in the root of this project.
-
----
-
-### Step 3 — Install Dependencies
-
+### Step 2: Install Python Dependencies
 ```bash
 pip install -r requirements.txt
-playwright install chromium
 ```
 
----
+### Step 3: Set Up Your Gemini API Key
+Get a **free** API key from [Google AI Studio](https://aistudio.google.com/).
 
-### Step 4 — Configure the Agent
-
-Open `config.py` and edit the following settings to match your use case:
-
+Then either set it in `config.py`:
 ```python
-# The email address that sends the Google Meet invitations
-TARGET_SENDER_EMAIL = "sender@example.com"
-
-# The word the agent watches for in the meeting chat
-TARGET_WORD = "Attendance"
-
-# The message the agent automatically sends when TARGET_WORD is spotted
-RESPONSE_TEXT = "Present"
-
-# How often to poll Gmail inbox (in seconds)
-POLL_INTERVAL_SECONDS = 60
+GEMINI_API_KEY = "your_key_here"
 ```
-
----
-
-### Step 5 — Run the Agent
-
+Or export it as an environment variable:
 ```bash
-python main.py
+export GEMINI_API_KEY="your_key_here"
 ```
 
-> **First run:** A browser window will open asking you to sign in to your Google Account and authorize the app. After you approve, a `token.json` file is created locally so future runs are fully headless.
-
-**Expected output:**
-
-```
-Initializing Google Meet AI Agent Orchestrator...
-Gmail API Authenticated successfully!
-Polling inbox every 60 seconds.
-Checking inbox for new Meet invitations...
-Agent is now running and waiting for scheduled tasks. Press Ctrl+C to exit.
+### Step 4: Configure Your Identity
+Edit `config.py` to set your name and roll number:
+```python
+STUDENT_NAME = "Idrees"
+ROLL_NUMBER = "21-CS-42"  # Leave empty if not needed
 ```
 
----
-
-## ⚙️ Configuration Reference
-
-| Variable | Default | Description |
-|---|---|---|
-| `TARGET_SENDER_EMAIL` | — | Email address to watch for invitations from |
-| `POLL_INTERVAL_SECONDS` | `60` | How often to check Gmail inbox (in seconds) |
-| `TARGET_WORD` | `"Attendance"` | Trigger word to watch for in the Meet chat |
-| `RESPONSE_TEXT` | `"Present"` | Automated reply to send when trigger word is found |
-| `HEADLESS_BROWSER` | `False` | Set to `True` when deploying on a headless server |
+### Step 5: Set Up Gmail Credentials (For Auto-Join)
+Place your `credentials.json` from Google Cloud Console in the project root. On first run, it will open a browser for Gmail authentication.
 
 ---
 
-## 🖥️ Deploying on a Headless Server
+## 🏃 How to Run
 
-When running on a cloud server (e.g., AWS EC2, DigitalOcean) that has no GUI:
-
-1. Set `HEADLESS_BROWSER = True` in `config.py`.
-2. Copy your `credentials.json` and pre-authorized `token.json` to the server.
-3. Install dependencies and run with `python main.py`.
-4. Optionally, wrap the command in a `systemd` service or `screen` session to keep it alive.
-
----
-
-## 📁 Project Structure
-
-```
-google-meet-ai-agent/
-├── main.py               # Orchestrator and scheduling loop
-├── email_watcher.py      # Gmail API polling and Meet link extraction
-├── meeting_agent.py      # Playwright browser automation for Google Meet
-├── config.py             # All user-configurable settings
-├── requirements.txt      # Python dependencies
-├── credentials.json      # ⚠️ NOT committed — your OAuth client secrets
-├── token.json            # ⚠️ NOT committed — generated on first run
-└── playwright_profile/   # ⚠️ NOT committed — persistent browser session
+### Option 1: Automatic Mode (Recommended)
+Polls your email for Google Meet invitation links and joins automatically at the scheduled time:
+```bash
+python3 main.py
 ```
 
-> ⚠️ **Security Note:** `credentials.json`, `token.json`, and the `playwright_profile/` folder are listed in `.gitignore` and must **never** be committed to a public repository.
+### Option 2: Direct Mode
+Join a specific meeting immediately:
+```bash
+python3 meeting_agent.py "https://meet.google.com/abc-defg-hij"
+```
+
+### What Happens When the Bot Joins:
+1. ✅ Mutes mic & camera automatically
+2. ✅ Clicks "Join" / "Ask to join"
+3. ✅ Opens the chat pane
+4. 🔊 **Thread 1 (Audio):** Records audio → Whisper transcribes → Detects your name → Gemini generates response → Sends in chat
+5. 📸 **Thread 2 (OCR):** Takes screenshots every 60s → Extracts text → Saves to `notes/`
+6. 💬 **Thread 3 (Chat):** Monitors chat for attendance keywords → Auto-replies "Present"
 
 ---
 
-## 🔒 Security & Privacy
+## ⚠️ The "Free" Constraint Warning
 
-- All Gmail access is done via **OAuth 2.0** — no passwords are ever stored.
-- The `token.json` file contains your session credentials. Keep it private.
-- The `playwright_profile/` folder contains your Google session cookies. Never share it.
-
----
-
-## 🙏 Acknowledgements
-
-- [Google Gmail API](https://developers.google.com/gmail/api) for secure, official inbox access
-- [Playwright for Python](https://playwright.dev/python/) for powerful browser automation
-- [schedule](https://schedule.readthedocs.io/) for lightweight Python job scheduling
+1. **Hardware:** Running Whisper (Speech-to-Text) locally uses a lot of RAM/CPU. If your laptop slows down, change `WHISPER_MODEL = "tiny"` in `config.py`.
+2. **Gemini API Key:** It's free as long as you don't exceed ~15 requests per minute.
+3. **First Run:** Whisper will download the model file (~150MB for `base`) on the first run.
 
 ---
 
-## 📄 License
+---
 
-This project is licensed under the **MIT License** — see the [LICENSE](LICENSE) file for details.
+## 🛠️ Troubleshooting
+
+### "You can't join this video call" Error
+If you see this error:
+1. **Manual Login:** Run with `HEADLESS_BROWSER = False` in `config.py`. When the browser opens, log in to your Google Account manually if prompted. The session will be saved in `playwright_profile/`.
+2. **Account Match:** Ensure the account you log into is the same one that receives the meeting invitations.
+3. **Link Validity:** Check if the meeting link is still active.
+
+### Whisper is Slow / Laptop Lagging
+- Change `WHISPER_MODEL = "tiny"` in `config.py`. This uses significantly less RAM.
+
+### Audio Not Capturing
+- Ensure your system uses **PulseAudio** (default on Ubuntu).
+- Run `pactl info` in terminal; it should show a running server.
+
+---
+
+## ⚖️ Disclaimer
+This project is for **educational purposes only**. Use responsibly and ensure you are complying with your institution's policies regarding online classes.

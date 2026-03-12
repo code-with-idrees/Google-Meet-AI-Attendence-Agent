@@ -1,0 +1,2 @@
+whisper-model-turbo/model.bin filter=lfs diff=lfs merge=lfs -text
+ollama filter=lfs diff=lfs merge=lfs -text
