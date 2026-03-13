@@ -4,7 +4,7 @@
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![Playwright](https://img.shields.io/badge/Playwright-Automation-2EAD33?style=for-the-badge&logo=playwright&logoColor=white)
-![Whisper](https://img.shields.io/badge/OpenAI-Whisper%20Local-412991?style=for-the-badge&logo=openai&logoColor=white)
+![Faster-Whisper](https://img.shields.io/badge/Faster--Whisper-Local%20STT-412991?style=for-the-badge&logo=openai&logoColor=white)
 ![Ollama](https://img.shields.io/badge/Ollama-Local%20LLM-black?style=for-the-badge&logo=ollama&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)
 ![Platform](https://img.shields.io/badge/Platform-Ubuntu%20%7C%20Linux-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)
@@ -27,7 +27,7 @@
 - 📸 **See** the screen and capture slide content via OCR every 60 seconds
 - 📝 **Save** timestamped class notes combining the audio transcript and slide text
 
-The entire pipeline runs on **free-tier APIs** and **locally-run open-source models**, with zero recurring cost.
+The entire pipeline runs on **locally-run open-source models**, with zero recurring cost and zero cloud dependencies.
 
 ---
 
@@ -256,7 +256,7 @@ Then set your chosen model in `config.py`:
 OLLAMA_MODEL = "llama3.2"   # Must match the model name you pulled above
 ```
 
-> Ollama runs as a local server on `localhost:11434`. Make sure it is running before starting the agent — see [Troubleshooting](#ollama-not-responding) if needed.
+> Ollama runs as a local server on `localhost:11434`. Make sure it is running before starting the agent — see [Troubleshooting](#ollama-not-responding--slow-replies) if needed.
 
 ---
 
@@ -523,7 +523,7 @@ The generated notes file at the end of a class — timestamps, slide content, an
 
 ### "You can't join this video call"
 
-Your Google session has expired. Redo the [First-Time Login](#step-8-first-time-google-login) step:
+Your Google session has expired. Redo the [First-Time Google Login](#step-8-first-time-google-login) step:
 
 ```bash
 # In config.py set: HEADLESS_BROWSER = False
@@ -577,7 +577,7 @@ python3 download_model.py
 
 ---
 
-## 📦 GitHub Releases — Should You Use Them?
+## 📦 GitHub Releases
 
 **Yes for Releases, No for Packages.**
 
